@@ -36,6 +36,7 @@ video{
   border-radius:10px;border:3px solid white;
   z-index:1;
 }
+
 #camLabel{
   position:fixed;top:10px;left:20px;background:black;color:white;
   padding:5px 10px;border-radius:5px;z-index:2;
@@ -51,6 +52,7 @@ video{
   background:white;border-radius:10px;
   box-shadow:0 0 10px rgba(0,0,0,0.3);z-index:9999;
 }
+
 #chat{height:200px;overflow-y:auto;padding:10px;background:#f9f9f9;}
 </style>
 </head>
@@ -114,7 +116,7 @@ function simulateAccident(){
   accidentCount++;
   document.getElementById("accidents").innerText=accidentCount;
 
-  document.getElementById("status").innerHTML="💥 Accident Detected!";
+  document.getElementById("status").innerHTML="💥 Accident Detected";
   setTimeout(()=>statusAdd("🤖 AI analyzing..."),1000);
   setTimeout(()=>statusAdd("📍 Tracking location..."),2000);
   setTimeout(()=>handleLocation(true),3000);
@@ -182,32 +184,48 @@ function sendMsg(){
   document.getElementById("input").value="";
 }
 
-// SMART AI BOT
+// 🔥 AI BOT WITH CONTACTS
 function getAIReply(msg){
   msg = msg.toLowerCase();
 
-  if(msg.includes("hi") || msg.includes("hello"))
-    return "👋 Hello! I am your AI Accident Assistant.";
+  if(msg.includes("hi"))
+    return "👋 Hello! I am your AI Assistant.";
 
   if(msg.includes("accident"))
-    return "🚨 Accident → system detects → ambulance + alerts sent.";
+    return "🚨 Accident → ambulance + alerts sent.";
 
   if(msg.includes("help"))
-    return "🆘 Stay calm → share location → wait for ambulance.";
+    return "🆘 Stay calm → share location → wait for help.";
 
   if(msg.includes("location"))
-    return "📍 GPS tracks your real-time location.";
+    return "📍 GPS tracking is active.";
 
-  if(msg.includes("hospital"))
-    return "🏥 Nearest hospital route is shown on map.";
+  if(msg.includes("hospital") || msg.includes("nearest")){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      
+      let hospitals = [
+        {name:"City Hospital", phone:"📞 9876543210"},
+        {name:"Apollo Hospital", phone:"📞 9123456780"},
+        {name:"Emergency Care Center", phone:"📞 9012345678"}
+      ];
+
+      let chat=document.getElementById("chat");
+
+      let list = hospitals.map(h =>
+        `${h.name}<br>${h.phone}`
+      ).join("<br><br>");
+
+      chat.innerHTML += `<p><b>Bot:</b> 🏥 Nearest Hospitals:<br><br>${list}</p>`;
+      chat.scrollTop = chat.scrollHeight;
+    });
+
+    return "🔍 Finding hospitals with contacts...";
+  }
 
   if(msg.includes("emergency"))
-    return "🚑 Emergency button activates full response.";
+    return "🚑 Emergency triggers full response.";
 
-  if(msg.includes("camera"))
-    return "📷 AI camera monitors driver.";
-
-  return "🤖 Ask about accident, emergency, location!";
+  return "🤖 Ask about accident, hospital, emergency!";
 }
 
 function statusAdd(text){
