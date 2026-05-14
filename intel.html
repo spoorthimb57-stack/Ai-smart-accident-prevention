@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Smart Accident Prevention System</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+
+body{background:#f4f7fb;}
+
+header{
+  background:linear-gradient(90deg,#0f172a,#1e3a8a);
+  color:white;
+  padding:20px;
+  text-align:center;
+}
+
+nav{
+  background:#111827;
+  padding:12px;
+  text-align:center;
+}
+
+nav a{
+  color:white;
+  margin:0 15px;
+  text-decoration:none;
+}
+
+.hero{
+  height:400px;
+  background:url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200') center/cover;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:white;
+}
+
+.hero-content{
+  background:rgba(0,0,0,0.6);
+  padding:25px;
+  border-radius:10px;
+  text-align:center;
+}
+
+.btn{
+  background:red;
+  color:white;
+  padding:12px 25px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+section{
+  padding:40px 10%;
+}
+
+#map{
+  height:400px;
+  width:100%;
+  border-radius:10px;
+}
+
+/* SMS Popup */
+#smsPopup{
+  position:fixed;
+  top:20px;
+  right:20px;
+  background:#111;
+  color:#0f0;
+  padding:15px;
+  border-radius:10px;
+  display:none;
+  width:260px;
+  box-shadow:0 0 10px rgba(0,0,0,0.5);
+}
+
+/* Alert animation */
+.alert-blink{
+  animation: blink 1s infinite;
+}
+@keyframes blink{
+  0%{opacity:1;}
+  50%{opacity:0.4;}
+  100%{opacity:1;}
+}
+
+footer{
+  background:#0f172a;
+  color:white;
+  text-align:center;
+  padding:20px;
+  margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>AI Smart Accident Prevention System</h1>
+</header>
+
+<nav>
+<a href="#">Home</a>
+<a href="#">Features</a>
+<a href="#">Dashboard</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-content">
+    <h2 id="aiStatus">Smart AI Monitoring</h2>
+    <button class="btn" onclick="startEmergency()">🚨 Emergency</button>
+    <p id="status"></p>
+  </div>
+</div>
+
+<section>
+<h2>Live Tracking & Ambulance Routing</h2>
+<div id="map"></div>
+</section>
+
+<div id="smsPopup"></div>
+
+<footer>
+<p>© 2026 AI Accident System</p>
+</footer>
+
+<script>
+let map, directionsService, directionsRenderer;
+let accidentTriggered = false;
+
+function initMap() {
+
+  const defaultLoc = { lat: 12.9716, lng: 77.5946 };
+
+  map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 13,
+    center: defaultLoc
+  });
+
+  directionsService = new google.maps.DirectionsService();
+  directionsRenderer = new google.maps.DirectionsRenderer();
+  directionsRenderer.setMap(map);
+
+  // 🔥 Auto AI detection every 8 sec
+  setInterval(simulateAI, 8000);
+}
+
+// 🧠 Fake AI detection
+function simulateAI(){
+
+  if(!accidentTriggered){
+
+    accidentTriggered = true;
+
+    document.getElementById("aiStatus").innerHTML =
+    "⚠️ AI Detected Accident!";
+
+    document.getElementById("aiStatus").classList.add("alert-blink");
+
+    startEmergency();
+  }
+}
+
+// 🚨 Emergency
+function startEmergency(){
+
+  document.getElementById("status").innerHTML =
+  "🚑 Detecting location...";
+
+  navigator.geolocation.getCurrentPosition((pos)=>{
+
+    const userLoc = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude
+    };
+
+    map.setCenter(userLoc);
+
+    new google.maps.Marker({
+      position:userLoc,
+      map:map,
+      title:"Accident Location"
+    });
+
+    findHospital(userLoc);
+    sendSMS(userLoc);
+
+  }, ()=>{
+    alert("Location permission denied!");
+  });
+}
+
+// 🏥 Demo hospital (no API dependency)
+function findHospital(userLoc){
+
+  const hospitalLoc = {
+    lat: 12.9767,
+    lng: 77.5713
+  };
+
+  new google.maps.Marker({
+    position:hospitalLoc,
+    map:map,
+    icon:"http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+    title:"Nearest Hospital"
+  });
+
+  drawRoute(userLoc, hospitalLoc);
+}
+
+// 🚑 Route + ETA
+function drawRoute(start,end){
+
+  directionsService.route({
+    origin:start,
+    destination:end,
+    travelMode:"DRIVING"
+  },(result,status)=>{
+
+    if(status === "OK"){
+
+      directionsRenderer.setDirections(result);
+
+      const leg = result.routes[0].legs[0];
+
+      document.getElementById("status").innerHTML =
+      "🚑 ETA: " + leg.duration.text +
+      " | Distance: " + leg.distance.text;
+    }
+  });
+}
+
+// 📱 Fake SMS
+function sendSMS(loc){
+
+  const popup = document.getElementById("smsPopup");
+
+  popup.style.display = "block";
+
+  popup.innerHTML =
+  "📩 SMS SENT<br><br>" +
+  "🚨 Accident Detected<br>" +
+  "📍 Location:<br>" +
+  loc.lat.toFixed(4) + ", " + loc.lng.toFixed(4);
+
+  setTimeout(()=>{
+    popup.style.display = "none";
+  },5000);
+}
+</script>
+
+<script async
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCMeQnjmPRaRlrkJB3FzWJrvhVPmiRGteQ&callback=initMap">
+</script>
+
+</body>
+</html>
