@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,7 +28,7 @@ button{
 }
 
 .dashboard{display:flex;justify-content:space-around;padding:20px;background:white;}
-.card{background:#1e3a8a;color:white;padding:15px;border-radius:10px;width:22%;text-align:center;}
+.card{background:#1e3a8a;color:white;padding:15px;border-radius:10px;width:18%;text-align:center;}
 
 #map{height:400px;}
 
@@ -74,17 +75,20 @@ video{
 </div>
 </div>
 
+<!-- DASHBOARD -->
 <div class="dashboard">
   <div class="card"><h3>🚨 Accidents</h3><p id="accidents">0</p></div>
   <div class="card"><h3>🚑 Ambulance</h3><p id="ambulance">Idle</p></div>
   <div class="card"><h3>📍 Location</h3><p id="location">Not tracked</p></div>
-  <div class="card"><h3>📩 Alerts</h3><p id="alerts">0</p></div>
+  <div class="card"><h3>❤️ Heart Rate</h3><p id="heart">--</p></div>
+  <div class="card"><h3>🩺 BP</h3><p id="bp">--</p></div>
+  <div class="card"><h3>⚠️ Status</h3><p id="healthStatus">Normal</p></div>
 </div>
 
 <div id="map"></div>
 <div id="sms"></div>
 
-<!-- 🤖 CHATBOT -->
+<!-- CHATBOT -->
 <div id="chatbox">
 <div style="background:#1e3a8a;color:white;padding:10px;">🤖 AI Assistant</div>
 <div id="chat"></div>
@@ -102,7 +106,7 @@ video{
 
 <script>
 let map = L.map('map').setView([12.9716,77.5946], 13);
-let accidentCount=0, alertCount=0;
+let accidentCount=0;
 
 // MAP
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -110,6 +114,26 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 // CAMERA
 navigator.mediaDevices.getUserMedia({video:true})
 .then(stream=>{document.getElementById("cam").srcObject=stream;});
+
+// 💓 HEALTH MONITOR (SIMULATION)
+setInterval(()=>{
+  let heart = Math.floor(Math.random()*40)+60; // 60–100
+  let bpVal = Math.random() > 0.5 ? "Normal" : "High";
+
+  document.getElementById("heart").innerText = heart + " bpm";
+  document.getElementById("bp").innerText = bpVal;
+
+  if(heart > 100 || bpVal === "High"){
+    document.getElementById("healthStatus").innerText = "⚠️ Risk";
+    statusAdd("⚠️ Driver health abnormal!");
+
+    // AUTO EMERGENCY TRIGGER
+    startEmergency();
+  } else {
+    document.getElementById("healthStatus").innerText = "Normal";
+  }
+
+},5000);
 
 // SIMULATE
 function simulateAccident(){
@@ -120,18 +144,12 @@ function simulateAccident(){
   setTimeout(()=>statusAdd("🤖 AI analyzing..."),1000);
   setTimeout(()=>statusAdd("📍 Tracking location..."),2000);
   setTimeout(()=>handleLocation(true),3000);
-  setTimeout(()=>document.getElementById("ambulance").innerText="Dispatched",4000);
-  setTimeout(()=>statusAdd("📩 SMS sent!"),5000);
 }
 
 // EMERGENCY
 function startEmergency(){
   document.getElementById("status").innerHTML="🚨 Emergency Activated";
-  setTimeout(()=>statusAdd("📍 Getting location..."),1000);
-  setTimeout(()=>statusAdd("📡 Location detected"),2000);
-  setTimeout(()=>handleLocation(false),3000);
-  setTimeout(()=>statusAdd("🏥 Hospital found"),4000);
-  setTimeout(()=>statusAdd("🗺 Route shown"),5000);
+  setTimeout(()=>handleLocation(false),2000);
 }
 
 // LOCATION
@@ -149,17 +167,12 @@ function handleLocation(isAccident){
     let hLat=lat+0.01, hLng=lng+0.01;
     L.marker([hLat,hLng]).addTo(map).bindPopup("Hospital");
 
-    L.polyline([[lat,lng],[hLat,hLng]],{color:'red'}).addTo(map);
-
     if(isAccident) showSMS(lat,lng);
   });
 }
 
 // SMS
 function showSMS(lat,lng){
-  alertCount++;
-  document.getElementById("alerts").innerText=alertCount;
-
   let sms=document.getElementById("sms");
   sms.style.display="block";
   sms.innerHTML="📩 Accident Alert<br>"+lat.toFixed(4)+","+lng.toFixed(4);
@@ -169,7 +182,7 @@ function showSMS(lat,lng){
 // CHATBOT
 function sendMsg(){
   let input=document.getElementById("input").value;
-  if(input.trim()==="") return;
+  if(input==="") return;
 
   let chat=document.getElementById("chat");
   chat.innerHTML+="<p><b>You:</b> "+input+"</p>";
@@ -184,48 +197,18 @@ function sendMsg(){
   document.getElementById("input").value="";
 }
 
-// 🔥 AI BOT WITH CONTACTS
+// AI BOT
 function getAIReply(msg){
   msg = msg.toLowerCase();
 
-  if(msg.includes("hi"))
-    return "👋 Hello! I am your AI Assistant.";
+  if(msg.includes("health"))
+    return "❤️ I monitor heart rate, BP, and detect abnormal conditions.";
 
-  if(msg.includes("accident"))
-    return "🚨 Accident → ambulance + alerts sent.";
-
-  if(msg.includes("help"))
-    return "🆘 Stay calm → share location → wait for help.";
-
-  if(msg.includes("location"))
-    return "📍 GPS tracking is active.";
-
-  if(msg.includes("hospital") || msg.includes("nearest")){
-    navigator.geolocation.getCurrentPosition(pos=>{
-      
-      let hospitals = [
-        {name:"City Hospital", phone:"📞 9876543210"},
-        {name:"Apollo Hospital", phone:"📞 9123456780"},
-        {name:"Emergency Care Center", phone:"📞 9012345678"}
-      ];
-
-      let chat=document.getElementById("chat");
-
-      let list = hospitals.map(h =>
-        `${h.name}<br>${h.phone}`
-      ).join("<br><br>");
-
-      chat.innerHTML += `<p><b>Bot:</b> 🏥 Nearest Hospitals:<br><br>${list}</p>`;
-      chat.scrollTop = chat.scrollHeight;
-    });
-
-    return "🔍 Finding hospitals with contacts...";
+  if(msg.includes("hospital")){
+    return "🏥 Nearby: City Hospital (9876543210), Apollo (9123456780)";
   }
 
-  if(msg.includes("emergency"))
-    return "🚑 Emergency triggers full response.";
-
-  return "🤖 Ask about accident, hospital, emergency!";
+  return "🤖 Ask about health, hospital, accident!";
 }
 
 function statusAdd(text){
