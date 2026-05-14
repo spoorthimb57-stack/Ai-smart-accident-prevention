@@ -2,16 +2,13 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Smart Accident Monitoring System</title>
+<title>Smart Accident Monitoring & Emergency Response System</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
 body{margin:0;font-family:Arial;background:#f4f7fb;}
-
-header{
-  background:#1e3a8a;color:white;text-align:center;padding:15px;
-}
+header{background:#1e3a8a;color:white;text-align:center;padding:15px;}
 
 .hero{
   height:250px;
@@ -25,61 +22,36 @@ header{
 }
 
 button{
-  padding:10px;margin:5px;
-  border:none;border-radius:5px;
-  background:red;color:white;cursor:pointer;
+  padding:10px;margin:5px;border:none;
+  border-radius:5px;background:red;color:white;cursor:pointer;
 }
 
-/* DASHBOARD */
-.dashboard{
-  display:flex;
-  justify-content:space-around;
-  padding:20px;
-  background:white;
-}
-
-.card{
-  background:#1e3a8a;
-  color:white;
-  padding:15px;
-  border-radius:10px;
-  width:22%;
-  text-align:center;
-}
+.dashboard{display:flex;justify-content:space-around;padding:20px;background:white;}
+.card{background:#1e3a8a;color:white;padding:15px;border-radius:10px;width:22%;text-align:center;}
 
 #map{height:400px;}
 
-/* CAMERA */
 video{
-  position:fixed;
-  top:40px;
-  left:20px;
-  width:180px;
-  border-radius:10px;
-  border:3px solid white;
-  z-index:1000;
+  position:fixed;top:40px;left:20px;width:180px;
+  border-radius:10px;border:3px solid white;
+  z-index:1;
 }
-
 #camLabel{
-  position:fixed;
-  top:10px;
-  left:20px;
-  background:black;
-  color:white;
-  padding:5px 10px;
-  border-radius:5px;
-  z-index:1001;
+  position:fixed;top:10px;left:20px;background:black;color:white;
+  padding:5px 10px;border-radius:5px;z-index:2;
 }
 
-/* SMS */
 #sms{
-  position:fixed;
-  top:20px;
-  right:20px;
-  background:black;color:#0f0;
-  padding:10px;border-radius:10px;
-  display:none;
+  position:fixed;top:20px;right:20px;background:black;color:#0f0;
+  padding:10px;border-radius:10px;display:none;
 }
+
+#chatbox{
+  position:fixed;bottom:20px;right:20px;width:320px;
+  background:white;border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.3);z-index:9999;
+}
+#chat{height:200px;overflow-y:auto;padding:10px;background:#f9f9f9;}
 </style>
 </head>
 
@@ -94,159 +66,152 @@ video{
 
 <div class="hero">
 <div class="box">
-
-<h3 id="status">🟢 System Normal (Auto Monitoring ON)</h3>
-
+<h3 id="status">🟢 System Normal</h3>
 <button onclick="simulateAccident()">💥 Simulate Accident</button>
 <button onclick="startEmergency()">🚨 Emergency</button>
-
 </div>
 </div>
 
 <div class="dashboard">
-  <div class="card">
-    <h3>🚨 Accidents</h3>
-    <p id="accidents">0</p>
-  </div>
-  <div class="card">
-    <h3>🚑 Ambulance</h3>
-    <p id="ambulance">Idle</p>
-  </div>
-  <div class="card">
-    <h3>📍 Location</h3>
-    <p id="location">Not tracked</p>
-  </div>
-  <div class="card">
-    <h3>📩 Alerts</h3>
-    <p id="alerts">0</p>
-  </div>
+  <div class="card"><h3>🚨 Accidents</h3><p id="accidents">0</p></div>
+  <div class="card"><h3>🚑 Ambulance</h3><p id="ambulance">Idle</p></div>
+  <div class="card"><h3>📍 Location</h3><p id="location">Not tracked</p></div>
+  <div class="card"><h3>📩 Alerts</h3><p id="alerts">0</p></div>
 </div>
 
 <div id="map"></div>
 <div id="sms"></div>
 
+<!-- 🤖 CHATBOT -->
+<div id="chatbox">
+<div style="background:#1e3a8a;color:white;padding:10px;">🤖 AI Assistant</div>
+<div id="chat"></div>
+
+<div style="display:flex;border-top:1px solid #ccc;">
+  <input id="input" type="text" placeholder="Type here..."
+  style="flex:1;padding:10px;border:none;outline:none;">
+  <button onclick="sendMsg()" style="width:80px;background:#1e3a8a;color:white;border:none;">
+  Send
+  </button>
+</div>
+</div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 let map = L.map('map').setView([12.9716,77.5946], 13);
-let accidentCount = 0;
-let alertCount = 0;
+let accidentCount=0, alertCount=0;
 
 // MAP
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'© OpenStreetMap'
-}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 // CAMERA
 navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
-  document.getElementById("cam").srcObject=stream;
-});
+.then(stream=>{document.getElementById("cam").srcObject=stream;});
 
-// 💥 SIMULATION
+// SIMULATE
 function simulateAccident(){
-
   accidentCount++;
-  document.getElementById("accidents").innerText = accidentCount;
+  document.getElementById("accidents").innerText=accidentCount;
 
-  document.getElementById("status").innerHTML = "💥 Accident Detected!";
-
-  setTimeout(()=>{
-    document.getElementById("status").innerHTML += "<br>🤖 AI analyzing...";
-  },1000);
-
-  setTimeout(()=>{
-    document.getElementById("status").innerHTML += "<br>📍 Tracking location...";
-  },2000);
-
-  setTimeout(()=>{
-    handleLocation(true);
-  },3000);
-
-  setTimeout(()=>{
-    document.getElementById("ambulance").innerText = "Dispatched";
-  },4000);
-
-  setTimeout(()=>{
-    document.getElementById("status").innerHTML += "<br>📩 SMS sent!";
-  },5000);
+  document.getElementById("status").innerHTML="💥 Accident Detected!";
+  setTimeout(()=>statusAdd("🤖 AI analyzing..."),1000);
+  setTimeout(()=>statusAdd("📍 Tracking location..."),2000);
+  setTimeout(()=>handleLocation(true),3000);
+  setTimeout(()=>document.getElementById("ambulance").innerText="Dispatched",4000);
+  setTimeout(()=>statusAdd("📩 SMS sent!"),5000);
 }
 
-// 🚨 FIXED EMERGENCY FLOW
+// EMERGENCY
 function startEmergency(){
-
-  document.getElementById("status").innerHTML =
-  "🚨 Emergency Mode Activated";
-
-  setTimeout(()=>{
-    document.getElementById("status").innerHTML +=
-    "<br>📍 Getting location...";
-  },1000);
-
-  setTimeout(()=>{
-    document.getElementById("status").innerHTML +=
-    "<br>📡 Location detected!";
-  },2000);
-
-  setTimeout(()=>{
-    handleLocation(false);
-  },3000);
-
-  setTimeout(()=>{
-    document.getElementById("status").innerHTML +=
-    "<br>🏥 Nearby hospital found";
-  },4000);
-
-  setTimeout(()=>{
-    document.getElementById("status").innerHTML +=
-    "<br>🗺️ Route displayed successfully!";
-  },5000);
+  document.getElementById("status").innerHTML="🚨 Emergency Activated";
+  setTimeout(()=>statusAdd("📍 Getting location..."),1000);
+  setTimeout(()=>statusAdd("📡 Location detected"),2000);
+  setTimeout(()=>handleLocation(false),3000);
+  setTimeout(()=>statusAdd("🏥 Hospital found"),4000);
+  setTimeout(()=>statusAdd("🗺 Route shown"),5000);
 }
 
-// 📍 LOCATION + ROUTE
+// LOCATION
 function handleLocation(isAccident){
-
   navigator.geolocation.getCurrentPosition(pos=>{
+    let lat=pos.coords.latitude;
+    let lng=pos.coords.longitude;
 
-    const lat=pos.coords.latitude;
-    const lng=pos.coords.longitude;
-
-    document.getElementById("location").innerText =
+    document.getElementById("location").innerText=
     lat.toFixed(3)+","+lng.toFixed(3);
 
     map.setView([lat,lng],14);
+    L.marker([lat,lng]).addTo(map);
 
-    L.marker([lat,lng]).addTo(map)
-      .bindPopup(isAccident ? "Accident Location" : "User Location")
-      .openPopup();
-
-    const hLat = lat + 0.01;
-    const hLng = lng + 0.01;
-
-    L.marker([hLat,hLng]).addTo(map)
-      .bindPopup("Hospital");
+    let hLat=lat+0.01, hLng=lng+0.01;
+    L.marker([hLat,hLng]).addTo(map).bindPopup("Hospital");
 
     L.polyline([[lat,lng],[hLat,hLng]],{color:'red'}).addTo(map);
 
-    if(isAccident){
-      showSMS(lat,lng);
-    }
-
+    if(isAccident) showSMS(lat,lng);
   });
 }
 
-// 📩 SMS
+// SMS
 function showSMS(lat,lng){
   alertCount++;
-  document.getElementById("alerts").innerText = alertCount;
+  document.getElementById("alerts").innerText=alertCount;
 
   let sms=document.getElementById("sms");
   sms.style.display="block";
-
-  sms.innerHTML =
-  "📩 Accident Alert<br>"+lat.toFixed(4)+","+lng.toFixed(4);
-
+  sms.innerHTML="📩 Accident Alert<br>"+lat.toFixed(4)+","+lng.toFixed(4);
   setTimeout(()=>sms.style.display="none",4000);
+}
+
+// CHATBOT
+function sendMsg(){
+  let input=document.getElementById("input").value;
+  if(input.trim()==="") return;
+
+  let chat=document.getElementById("chat");
+  chat.innerHTML+="<p><b>You:</b> "+input+"</p>";
+
+  let reply=getAIReply(input);
+
+  setTimeout(()=>{
+    chat.innerHTML+="<p><b>Bot:</b> "+reply+"</p>";
+    chat.scrollTop=chat.scrollHeight;
+  },500);
+
+  document.getElementById("input").value="";
+}
+
+// SMART AI BOT
+function getAIReply(msg){
+  msg = msg.toLowerCase();
+
+  if(msg.includes("hi") || msg.includes("hello"))
+    return "👋 Hello! I am your AI Accident Assistant.";
+
+  if(msg.includes("accident"))
+    return "🚨 Accident → system detects → ambulance + alerts sent.";
+
+  if(msg.includes("help"))
+    return "🆘 Stay calm → share location → wait for ambulance.";
+
+  if(msg.includes("location"))
+    return "📍 GPS tracks your real-time location.";
+
+  if(msg.includes("hospital"))
+    return "🏥 Nearest hospital route is shown on map.";
+
+  if(msg.includes("emergency"))
+    return "🚑 Emergency button activates full response.";
+
+  if(msg.includes("camera"))
+    return "📷 AI camera monitors driver.";
+
+  return "🤖 Ask about accident, emergency, location!";
+}
+
+function statusAdd(text){
+  document.getElementById("status").innerHTML+="<br>"+text;
 }
 </script>
 
