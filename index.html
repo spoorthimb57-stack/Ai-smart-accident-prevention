@@ -1,18 +1,22 @@
+
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Smart Accident Monitoring & Emergency Response System</title>
+<title>AI Smart Accident Monitoring & Emergency Response System</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
 
 body{
     margin:0;
-    font-family:Arial;
+    font-family:Arial,sans-serif;
     background:#f4f7fb;
 }
+
+/* HEADER */
 
 header{
     background:#1e3a8a;
@@ -21,10 +25,14 @@ header{
     padding:15px;
 }
 
-.hero{
-    height:250px;
+/* HERO */
 
-    background:url('https://images.unsplash.com/photo-1503376780353-7e6692767b70')
+.hero{
+    height:260px;
+
+    background:
+    linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.6)),
+    url('https://images.unsplash.com/photo-1503376780353-7e6692767b70')
     center/cover;
 
     display:flex;
@@ -33,30 +41,42 @@ header{
 }
 
 .box{
-    background:rgba(0,0,0,0.7);
+    background:rgba(0,0,0,0.75);
     color:white;
-    padding:20px;
-    border-radius:10px;
+    padding:25px;
+    border-radius:12px;
     text-align:center;
 }
 
+/* BUTTONS */
+
 button{
-    padding:10px;
+    padding:10px 15px;
     margin:5px;
     border:none;
     border-radius:5px;
-    background:red;
-    color:white;
     cursor:pointer;
+    color:white;
+    font-weight:bold;
 }
+
+.accidentBtn{
+    background:red;
+}
+
+.emergencyBtn{
+    background:#2563eb;
+}
+
+/* DASHBOARD */
 
 .dashboard{
     display:flex;
     justify-content:space-around;
-    padding:20px;
-    background:white;
     flex-wrap:wrap;
     gap:10px;
+    padding:20px;
+    background:white;
 }
 
 .card{
@@ -65,23 +85,17 @@ button{
     padding:15px;
     border-radius:10px;
     width:18%;
-    text-align:center;
     min-width:150px;
+    text-align:center;
 }
+
+/* MAP */
 
 #map{
-    height:400px;
+    height:420px;
 }
 
-video{
-    position:fixed;
-    top:40px;
-    left:20px;
-    width:180px;
-    border-radius:10px;
-    border:3px solid white;
-    z-index:1;
-}
+/* CAMERA */
 
 #camLabel{
     position:fixed;
@@ -94,36 +108,76 @@ video{
     z-index:2;
 }
 
+video{
+    position:fixed;
+    top:40px;
+    left:20px;
+    width:180px;
+    border-radius:10px;
+    border:3px solid white;
+    z-index:1;
+}
+
+/* SMS ALERT */
+
 #sms{
     position:fixed;
     top:20px;
     right:20px;
     background:black;
-    color:#0f0;
+    color:#00ff00;
     padding:15px;
     border-radius:10px;
     display:none;
+    width:280px;
     z-index:9999;
-    width:250px;
     box-shadow:0 0 15px red;
 }
+
+/* CHATBOT */
 
 #chatbox{
     position:fixed;
     bottom:20px;
     right:20px;
-    width:320px;
+    width:340px;
     background:white;
     border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.3);
+    overflow:hidden;
+    box-shadow:0 0 10px rgba(0,0,0,0.4);
     z-index:9999;
 }
 
+.chat-header{
+    background:#1e3a8a;
+    color:white;
+    padding:12px;
+    font-weight:bold;
+}
+
 #chat{
-    height:200px;
+    height:240px;
     overflow-y:auto;
     padding:10px;
     background:#f9f9f9;
+}
+
+.chat-input{
+    display:flex;
+    border-top:1px solid #ccc;
+}
+
+.chat-input input{
+    flex:1;
+    padding:10px;
+    border:none;
+    outline:none;
+}
+
+.chat-input button{
+    width:80px;
+    border-radius:0;
+    background:#1e3a8a;
 }
 
 </style>
@@ -132,8 +186,10 @@ video{
 <body>
 
 <header>
-<h2>Smart Accident Monitoring & Emergency Response System</h2>
+<h2>🚑 AI Smart Accident Monitoring & Emergency Response System</h2>
 </header>
+
+<!-- CAMERA -->
 
 <div id="camLabel">📷 AI Camera</div>
 
@@ -145,13 +201,15 @@ video{
 
 <div class="box">
 
-<h3 id="status">🟢 System Normal</h3>
+<h2 id="status">🟢 System Normal</h2>
 
-<button onclick="simulateAccident()">
+<button class="accidentBtn"
+onclick="simulateAccident()">
 💥 Simulate Accident
 </button>
 
-<button onclick="startEmergency()">
+<button class="emergencyBtn"
+onclick="startEmergency()">
 🚨 Emergency
 </button>
 
@@ -202,40 +260,21 @@ video{
 
 <div id="chatbox">
 
-<div style="
-background:#1e3a8a;
-color:white;
-padding:10px;
-">
-🤖 AI Assistant
+<div class="chat-header">
+🤖 AI Emergency Assistant
 </div>
 
 <div id="chat"></div>
 
-<div style="
-display:flex;
-border-top:1px solid #ccc;
-">
+<div class="chat-input">
 
 <input
 id="input"
 type="text"
-placeholder="Type here..."
-style="
-flex:1;
-padding:10px;
-border:none;
-outline:none;
-">
+placeholder="Ask about fire, ambulance, police..."
+>
 
-<button
-onclick="sendMsg()"
-style="
-width:80px;
-background:#1e3a8a;
-color:white;
-border:none;
-">
+<button onclick="sendMsg()">
 Send
 </button>
 
@@ -252,12 +291,12 @@ Send
 let map = L.map('map')
 .setView([12.9716,77.5946],13);
 
-let accidentCount = 0;
-let alertCount = 0;
-
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 ).addTo(map);
+
+let accidentCount = 0;
+let alertCount = 0;
 
 /* CAMERA */
 
@@ -271,11 +310,12 @@ navigator.mediaDevices.getUserMedia({
 /* STATUS */
 
 function statusAdd(text){
+
     document.getElementById("status").innerHTML +=
     "<br>" + text;
 }
 
-/* SIMULATE ACCIDENT */
+/* ACCIDENT */
 
 function simulateAccident(){
 
@@ -288,7 +328,7 @@ function simulateAccident(){
     "💥 Accident Detected";
 
     setTimeout(()=>{
-        statusAdd("🤖 AI analyzing...");
+        statusAdd("🤖 AI analyzing accident...");
     },1000);
 
     setTimeout(()=>{
@@ -316,6 +356,15 @@ function simulateAccident(){
     setTimeout(()=>{
         statusAdd("📩 Alerts sent to Ambulance & Fire Brigade");
     },6500);
+
+    /* VOICE ALERT */
+
+    let speech =
+    new SpeechSynthesisUtterance(
+    "Accident detected. Ambulance and Fire Brigade dispatched."
+    );
+
+    speechSynthesis.speak(speech);
 }
 
 /* EMERGENCY */
@@ -360,14 +409,14 @@ navigator.geolocation.getCurrentPosition(pos=>{
 
     map.setView([lat,lng],14);
 
-    /* Accident Marker */
+    /* ACCIDENT LOCATION */
 
     L.marker([lat,lng])
     .addTo(map)
     .bindPopup("💥 Accident Location")
     .openPopup();
 
-    /* Hospital */
+    /* HOSPITAL */
 
     let hLat = lat + 0.01;
     let hLng = lng + 0.01;
@@ -376,7 +425,7 @@ navigator.geolocation.getCurrentPosition(pos=>{
     .addTo(map)
     .bindPopup("🏥 Hospital");
 
-    /* Fire Station */
+    /* FIRE BRIGADE */
 
     let fLat = lat - 0.01;
     let fLng = lng - 0.01;
@@ -385,14 +434,12 @@ navigator.geolocation.getCurrentPosition(pos=>{
     .addTo(map)
     .bindPopup("🔥 Fire Brigade");
 
-    /* Ambulance Route */
+    /* ROUTES */
 
     L.polyline(
     [[lat,lng],[hLat,hLng]],
     {color:'red'}
     ).addTo(map);
-
-    /* Fire Brigade Route */
 
     L.polyline(
     [[fLat,fLng],[lat,lng]],
@@ -416,7 +463,8 @@ function showSMS(lat,lng){
     document.getElementById("alerts").innerText =
     alertCount;
 
-    let sms = document.getElementById("sms");
+    let sms =
+    document.getElementById("sms");
 
     sms.style.display = "block";
 
@@ -424,9 +472,11 @@ function showSMS(lat,lng){
 
     "📩 Emergency Alert Sent<br><br>" +
 
-    "🚑 Ambulance Alert Sent<br>" +
+    "🚑 Ambulance Alert Sent → 108<br>" +
 
-    "🔥 Fire Brigade Alert Sent<br><br>" +
+    "🔥 Fire Brigade Alert Sent → 101<br>" +
+
+    "👮 Police Alert Sent → 100<br><br>" +
 
     "📍 Location:<br>" +
 
@@ -442,29 +492,34 @@ function showSMS(lat,lng){
 function sendMsg(){
 
     let input =
-    document.getElementById("input").value;
+    document.getElementById("input");
 
-    if(input.trim()==="") return;
+    if(input.value.trim()==="") return;
 
     let chat =
     document.getElementById("chat");
 
     chat.innerHTML +=
-    "<p><b>You:</b> " + input + "</p>";
+    "<p><b>You:</b> " +
+    input.value +
+    "</p>";
 
-    let reply = getAIReply(input);
+    let reply =
+    getAIReply(input.value);
 
     setTimeout(()=>{
 
         chat.innerHTML +=
-        "<p><b>Bot:</b> " + reply + "</p>";
+        "<p><b>Bot:</b> " +
+        reply +
+        "</p>";
 
         chat.scrollTop =
         chat.scrollHeight;
 
     },500);
 
-    document.getElementById("input").value="";
+    input.value="";
 }
 
 /* AI CHATBOT */
@@ -473,25 +528,141 @@ function getAIReply(msg){
 
     msg = msg.toLowerCase();
 
-    if(msg.includes("hi"))
-    return "👋 Hello! AI Assistant Ready.";
+    /* GREETING */
 
-    if(msg.includes("accident"))
-    return "🚨 Accident detected. Ambulance and fire brigade dispatched.";
+    if(msg.includes("hi") || msg.includes("hello")){
+        return "👋 Hello! I am your AI Emergency Assistant.";
+    }
 
-    if(msg.includes("fire"))
-    return "🔥 Fire brigade activated.";
+    /* FIRE */
 
-    if(msg.includes("hospital"))
-    return "🏥 Nearest hospital route displayed.";
+    if(
+        msg.includes("fire") ||
+        msg.includes("brigade") ||
+        msg.includes("101")
+    ){
+        return "🔥 Fire Brigade Emergency Number: 101";
+    }
 
-    if(msg.includes("location"))
-    return "📍 GPS tracking active.";
+    /* AMBULANCE */
 
-    if(msg.includes("help"))
-    return "🆘 Stay calm. Rescue teams are coming.";
+    if(
+        msg.includes("ambulance") ||
+        msg.includes("108")
+    ){
+        return "🚑 Ambulance Emergency Number: 108";
+    }
 
-    return "🤖 Ask about accident, fire, hospital or emergency.";
+    /* POLICE */
+
+    if(
+        msg.includes("police") ||
+        msg.includes("100")
+    ){
+        return "👮 Police Emergency Number: 100";
+    }
+
+    /* HELP */
+
+    if(msg.includes("help")){
+        return `
+        🆘 Emergency Numbers:<br><br>
+
+        🚑 Ambulance → 108<br>
+
+        🔥 Fire Brigade → 101<br>
+
+        👮 Police → 100
+        `;
+    }
+
+    /* ACCIDENT */
+
+    if(msg.includes("accident")){
+        return `
+        🚨 Accident detected.<br><br>
+
+        🚑 Ambulance dispatched.<br>
+
+        🔥 Fire Brigade dispatched.
+        `;
+    }
+
+    /* HOSPITAL */
+
+    if(msg.includes("hospital")){
+        return "🏥 Nearby hospital route displayed.";
+    }
+
+    /* LOCATION */
+
+    if(msg.includes("location")){
+        return "📍 GPS tracking is active.";
+    }
+
+    /* CPR */
+
+    if(msg.includes("cpr")){
+        return `
+        ❤️ CPR Steps:<br><br>
+
+        1️⃣ Check breathing<br>
+
+        2️⃣ Call emergency<br>
+
+        3️⃣ Push hard and fast in center of chest
+        `;
+    }
+
+    /* FIRST AID */
+
+    if(msg.includes("first aid")){
+        return `
+        🩹 First Aid Tips:<br><br>
+
+        ✔ Stop bleeding<br>
+
+        ✔ Keep patient calm<br>
+
+        ✔ Call emergency services
+        `;
+    }
+
+    /* FIRE EXTINGUISHER */
+
+    if(msg.includes("extinguisher")){
+        return `
+        🧯 PASS Method:<br><br>
+
+        P → Pull pin<br>
+
+        A → Aim nozzle<br>
+
+        S → Squeeze handle<br>
+
+        S → Sweep side to side
+        `;
+    }
+
+    /* DEFAULT */
+
+    return `
+    🤖 Ask me about:<br><br>
+
+    🚑 Ambulance Number<br>
+
+    🔥 Fire Brigade Number<br>
+
+    👮 Police Number<br>
+
+    🚨 Accident<br>
+
+    🏥 Hospital<br>
+
+    ❤️ CPR<br>
+
+    🩹 First Aid
+    `;
 }
 
 </script>
