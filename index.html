@@ -174,7 +174,7 @@ font-size:18px;
 }
 
 .card p{
-font-size:30px;
+font-size:28px;
 font-weight:bold;
 color:#38bdf8;
 }
@@ -459,6 +459,11 @@ onclick="startVoiceAssistant()">
 <p id="alerts">0</p>
 </div>
 
+<div class="card">
+<h3>🚗 Collision Status</h3>
+<p id="collision">Safe</p>
+</div>
+
 </section>
 
 <!-- AI STATUS -->
@@ -481,7 +486,7 @@ onclick="startVoiceAssistant()">
 
 <div class="status-item">
 <h3>Vehicle Speed</h3>
-<p>72 km/h</p>
+<p id="speed">72 km/h</p>
 </div>
 
 <div class="status-item">
@@ -608,6 +613,7 @@ alert("Camera permission denied");
 let accidentCount = 0;
 let alertCount = 0;
 let currentDistance = 30;
+let collisionDetected = false;
 
 /* =========================
    ACCIDENT
@@ -697,6 +703,9 @@ document.getElementById("status").innerHTML =
 
 document.getElementById("ambulance").innerText =
 "Idle";
+
+document.getElementById("collision").innerHTML =
+"Safe";
 
 showAlert("🔄 System Reset");
 
@@ -817,12 +826,18 @@ chat.scrollHeight;
 }
 
 /* =========================
-   DISTANCE MONITOR
+   COLLISION DETECTION
 ========================= */
 
-function monitorDistance(){
+function collisionDetection(){
 
 setInterval(()=>{
+
+let vehicleSpeed =
+Math.floor(Math.random()*120);
+
+document.getElementById("speed").innerHTML =
+vehicleSpeed + " km/h";
 
 currentDistance =
 Math.floor(Math.random()*50)+5;
@@ -830,32 +845,51 @@ Math.floor(Math.random()*50)+5;
 document.getElementById("distance").innerHTML =
 currentDistance + " cm";
 
-if(currentDistance < 30){
+if(vehicleSpeed > 60 && currentDistance < 30){
+
+collisionDetected = true;
+
+document.getElementById("collision").innerHTML =
+"⚠ Collision Risk";
+
+document.getElementById("collision").style.color =
+"red";
 
 document.getElementById("distance").style.color =
 "red";
 
 document.getElementById("status").innerHTML =
-"⚠ Unsafe Distance Detected";
+"🚨 Collision Warning";
 
-showAlert("⚠ Warning! Distance below 30 cm");
+document.getElementById("ambulance").innerHTML =
+"Emergency Ready";
 
-speak("Warning. Distance below thirty centimeters");
+showAlert("🚨 Collision Detected!");
+
+speak("Warning. Possible collision detected");
 
 }
 
 else{
+
+collisionDetected = false;
+
+document.getElementById("collision").innerHTML =
+"Safe";
+
+document.getElementById("collision").style.color =
+"#22c55e";
 
 document.getElementById("distance").style.color =
 "#38bdf8";
 
 }
 
-},5000);
+},4000);
 
 }
 
-monitorDistance();
+collisionDetection();
 
 /* =========================
    CHATBOT
@@ -879,7 +913,7 @@ let msg =
 input.value.toLowerCase();
 
 let reply =
-"🤖 Ask about emergency, hospital, location or accident.";
+"🤖 Ask about emergency, hospital, location or collision.";
 
 if(msg.includes("hi"))
 reply =
@@ -900,6 +934,10 @@ reply =
 if(msg.includes("emergency"))
 reply =
 "🚑 Emergency response has started.";
+
+if(msg.includes("collision"))
+reply =
+"⚠ Collision monitoring system active.";
 
 setTimeout(()=>{
 
